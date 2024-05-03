@@ -252,7 +252,7 @@ While Visualising the data and images for UTKFace dataset, we have used few plot
 * **[Intensity Heatmap](./Results/Visualization/Heatmap%20image.png)** shows the effect of applying different heatmaps to a grayscale image of a person’s face. It is used here to highlight patterns, trends, and outliers in the data. The “hot” heatmap emphasizes the high-intensity regions of the image, such as the eyes, nose, and mouth. The “cool” heatmap emphasizes the low-intensity regions of the image, such as the hair, forehead, and cheeks.
 * We have splitted the image intensity into four parts red, green, blue, and grey and visualised them. Here the Grey is they average of all the other intensities.
 
-![this output](./Results/Visualization/Intensity_Split.png)
+![this output](./Results/Visualization/Intensity_split.png)
 
 <!-- Analysis of your dataset -->
 
