@@ -297,3 +297,259 @@ DBSCAN clustering was applied to the scaled data with specified parameters for e
 * Based on the above results between KMeans and KModes, we can consider that KMeans is much better than KModes. KModes generates mixed clusters, this is because KModes doesn't perform good for Numerical Data (which is our case here). And hence, KMeans provides much more promising results than KModes.
 
 * Hirarchichal Clustering only creates two clusters, K-Means and Agglomerative are able to get 5 clusters, which is more suitable for our dataset.
+
+### Decision Trees
+While exploring for Decision Tree, the approach moves towards using differenet regression models:
+1. Random Forest : An ensemble learning method that uses multiple decision trees to improve predicting performance. (IBM, 2023).
+2. XGBoost : An efficient and accurate gradient boosting implementation that has been optimised and scaled (Nvidia, n.d.).
+  * **Note:** Gradient boosting is an ensemble learning strategy that sequentially creates a sequence of weak learners, typically decision trees. (Wikipedia Contributors, 2019).
+3. Support Vector Regressor : A model capable of capturing complicated relationships in data, especially for non-linear patterns (GeeksforGeeks, 2023).
+4. K-Nearest Neighbors : A non-parametric, instance-based learning technique for predicting proximity (IBM, 2023b)(Ranjan, Verma & Radhika 2019).
+5. Logistic Regression : A linear model ideal for binary classification problems that provides insights into variable relationships (Subasi, 2020).
+6. Descision Tree : A decision tree is a prediction model that maps characteristics to outcomes by recursively partitioning data at each node based on the most important property. (scikit-learn, 2009).
+
+
+We use these regression models, as we need to predict charges, which is a continious variable.
+#### Experimental design
+* A train-test split is implemented with a test size of 0.25, allocating 75% of the data for training.
+* [Pipelines](./notebooks/code.ipynb#Pipeline-Creation-for-the-models)(Xin et al.)(Occhipinti et al.) are created for specific regressors, including RandomForestRegressor, DecisionTreeRegressor, XGBRegressor, SVM, KNeighborsRegressor, and LogisticRegression.
+* The regressor selection is based on the continuous nature of the 'charges' column.
+* Pipelines ensure uniformity in preprocessing steps and modeling across different algorithms.
+* Model training involves regressor selection, feature scaling, and hyperparameter tuning using GridSearchCV.
+* [GridSearchCV](./notebooks/code.ipynb#GridSearch-CV-for-each-Pipeline)(Shah)(Ranjan, Verma & Radhika 2019) is performed individually for each regressor to find optimal hyperparameters.
+* The [best parameters](./notebooks/code.ipynb#Passing-the-best-parameters-to-the-models) are then used to fit each pipeline on the training data.
+* The evaluation phase employs chosen metrics to assess model performance on the testing set.
+* Comparative analysis is conducted to select the best-performing regressor for predicting the continuous 'charges' variable.
+
+### Hyperparameters table
+**Following is the range of values for each hyper-parameters for models over which the model performs GridSearchCV:**
+
+| Model                    | Hyperparameter                    | Values                          |
+|--------------------------|-----------------------------------|---------------------------------|
+| Random Forest            | n_estimators                      | [100, 250, 300, 450]            |
+|                          | min_samples_leaf                  | [0.1, 0.16, 0.2, 0.26]          |
+| XGBoost                  | max_depth                         | [2, 6, 8, 10]                   |
+|                          | n_estimators                      | [50, 100, 125, 150]             |
+|                          | learning_rate                     | [0.01, 0.03, 0.04, 0.06]        |
+| Support Vector Regressor | kernel                            | ['linear', 'rbf']               |
+|                          | C                                 | [0.1, 1, 5, 10]                 |
+| K-Nearest Neighbors      | n_neighbors                       | [5, 7, 9, 11]                   |
+|                          | leaf_size                         | [5, 10, 20, 30]                 |
+| Logistic Regression      | max_iter                          | [60, 100, 120, 150]             |
+| Decision Tree            | max_depth                         | [3, 5, 7, 8]                    |
+|                          | min_samples_split                 | [2, 3, 4, 6]                    |
+
+**Model Evaluation and Comparison Process:**
+* Regression Models with the best parameters obtained from GridSearchCV are added to a dictionary.
+* [Model Evaluation](./notebooks/code.ipynb#Models-Training-and-Evaluation) is performed on the regression models to analyse each model's performance using metrics such as Mean Squared Error, Accuracy, R2 Score, and Adjusted R2 Score.
+* Train the models and determine their learning curves.
+* Visualise and compare the results to compare the performance of each regression model.
+
+#### Results
+* For the Hyperparameter tuning through GridSearchCV
+
+| Regression Model     |	Hyperparameter    | Value    |
+|----------------------|--------------------|----------|
+| Random Forest        | min_samples_leaf   | 0.1      |
+|                      | n_estimators       | 100      |
+| XGBoost              | learning_rate	    | 0.06     |
+|                      | max_depth          | 2        |
+|                      | n_estimators       | 150      |
+| SVM                  | C                  | 10       |
+|                      | kernel             | rbf      |
+| KNN                  | leaf_size          | 5        |
+|                      | n_neighbor         | 9        |
+| Decision Tree        | max_depth          | 5        |
+|                      | min_samples_split  | 6        |
+| Linear Regression    | max_iter           | 60       |
+
+<!-- Tables showing the results of your experiments -->
+#### Results
+* For the models after Evaluation (Tai, 2021)(“List of Evaluation Metrics for Classification and Regression”)
+
+| Regression Model     | Mean Squared Error | R2-Score | Adjusted R2 Score |
+|----------------------|--------------------|----------|-------------------|
+| Random Forest        | 162499.381         | 0.4253   | 0.4177            |
+| XGBoost              | 136980.79          | 0.515    | 0.5092            |
+| SVM                  | 157633.401         | 0.443    | 0.4352            |
+| KNN                  | 147982.06          | 0.4765   | 0.4697            |
+| Decision Tree        | 135791.64          | 0.5197   | 0.5134            |
+| Linear Regression    | 146863.24          | 0.48     | 0.4737            |
+
+**Mean Squared Error For each Model:**
+![MSE](./Results/Modelling/MSE.png)
+
+
+**R2-Score For each Model:**
+![R2-Score](./Results/Modelling/R2-Score.png)
+
+#### Discussion
+<!-- A brief discussion on the results of your experiment -->
+* For GridSearchCV the [range of values](README.md#hyperparameters-table) used sufficently tells the best parameters lie within the upper and lower values, suggesting the correctnedd of ranges suggested to be processed for hyperparameter tuning.
+* After the GridSearchCV, the processed best parameters are shown in the [table](README.md#results-1). The list shows which best parameters are fit for which model and should be used to implement model evaluation.
+* In the [results](README.md#results-2) it is observed that the mean squared error for Descision Tree Regression is the minimum (135791.64). Also, the R2-Score (0.5197) and Adjusted R2-Score (0.5134) is the best/highest for Descision Tree. This makes it the best model to be choosen for testing on new data.
+* While comparing the [learning curves](./Results/Modelling/) of each model, it is observed that [Descision Tree](./Results/Modelling/DF.png) performs really well compared to others.
+* A key observation that comes to notice is that [XGBoost](./Results/Modelling/XGBoost.png) also peforms almost as well as the Descision Tree. The mean squared error (136980.79), R2-Score (0.515) and Adjusted R2-Score (0.5092) are as close to that of the Descision Tree.
+### Neural Networks
+
+#### Experimental design
+<!-- Describe your experimental design and choices for the week. -->
+* Initially we started this process by creating a specific function, which aids in extracting data from the given UTK Face Datset. These are present as a text which defines the path of the image. And using this function, we were able to display the image.
+
+* Our convolutional neural network (CNN) (Browne and Ghidary) architecture is precision-structured for the experimental design to optimise feature extraction and predicting performance. The model starts with a shape input layer (64, 64, 1), then three convolutional layers (Conv2D) with decreasing size. Layers in MaxPooling reduce spatial dimensions, increasing computational performance. Dropout layers are intentionally placed to avoid overfitting. The Flatten layer flattens the output of dense layers, which are made up of varied nodes for feature representation. The model closes with two output layers: 'age_output' and 'gender_output', which predict age and gender, respectively (“Image Classification Using CNN : Python Implementation”)(S. Haldar, 2019).
+
+* Then, we compiled the neural network using the 'Adam' optimizer with dual outputs:
+  - Predicting Age (Using Mean squared Error Loss)
+  - Predicting Gender (Using Binary Crossentropy Loss)
+This was performed whilst tracking mean absolute error and accuracy metrics.
+
+* Then using Data Generator function we created earlier, we now create generators for training and testing datasets.
+
+* In the next step, we train the model using the training dataset and validate it over test dataset for 50 Epochs.
+
+* We then plot a Validation Loss Graph, which represents the model's performance during training.
+
+* As training the model using CNN takes a lot of time, we save it in a H5 format. This allows us to reuse it later without having to train the model again and deploy it in a production environment directly.
+
+#### Results
+
+
+
+**The CNN architechture (“CNN Image Classification | Image Classification Using CNN”) based on the experimental Design can be given as:**
+
+| Layer (type)                   | Output Shape       | Param #   | Connected to                   |
+|---------------------------------|---------------------|-----------|---------------------------------|
+| input_2 (InputLayer)           | (None, 64, 64, 1)   | 0         | []                              |
+| conv2d_3 (Conv2D)              | (None, 62, 62, 32)  | 320       | ['input_2[0][0]']               |
+| conv2d_4 (Conv2D)              | (None, 60, 60, 64)  | 18,496    | ['conv2d_3[0][0]']              |
+| max_pooling2d_2 (MaxPooling2D)  | (None, 30, 30, 64)  | 0         | ['conv2d_4[0][0]']              |
+| conv2d_5 (Conv2D)              | (None, 28, 28, 128) | 73,856    | ['max_pooling2d_2[0][0]']       |
+| max_pooling2d_3 (MaxPooling2D)  | (None, 14, 14, 128) | 0         | ['conv2d_5[0][0]']              |
+| dropout_11 (Dropout)           | (None, 14, 14, 128) | 0         | ['max_pooling2d_3[0][0]']       |
+| flatten_1 (Flatten)            | (None, 25088)      | 0         | ['dropout_11[0][0]']            |
+| dense_10 (Dense)               | (None, 128)        | 3,211,392 | ['flatten_1[0][0]']             |
+| dense_15 (Dense)               | (None, 128)        | 3,211,392 | ['flatten_1[0][0]']             |
+| dropout_12 (Dropout)           | (None, 128)        | 0         | ['dense_10[0][0]']              |
+| dropout_17 (Dropout)           | (None, 128)        | 0         | ['dense_15[0][0]']              |
+| dense_11 (Dense)               | (None, 64)         | 8,256     | ['dropout_12[0][0]']            |
+| dense_16 (Dense)               | (None, 64)         | 8,256     | ['dropout_17[0][0]']            |
+| dropout_13 (Dropout)           | (None, 64)         | 0         | ['dense_11[0][0]']              |
+| dropout_18 (Dropout)           | (None, 64)         | 0         | ['dense_16[0][0]']              |
+| dense_12 (Dense)               | (None, 32)         | 2,080     | ['dropout_13[0][0]']            |
+| dense_17 (Dense)               | (None, 32)         | 2,080     | ['dropout_18[0][0]']            |
+| dropout_14 (Dropout)           | (None, 32)         | 0         | ['dense_12[0][0]']              |
+| dropout_19 (Dropout)           | (None, 32)         | 0         | ['dense_17[0][0]']              |
+| dense_13 (Dense)               | (None, 16)         | 528       | ['dropout_14[0][0]']            |
+| dense_18 (Dense)               | (None, 16)         | 528       | ['dropout_19[0][0]']            |
+| dropout_15 (Dropout)           | (None, 16)         | 0         | ['dense_13[0][0]']              |
+| dropout_20 (Dropout)           | (None, 16)         | 0         | ['dense_18[0][0]']              |
+| dense_14 (Dense)               | (None, 8)          | 136       | ['dropout_15[0][0]']            |
+| dense_19 (Dense)               | (None, 8)          | 136       | ['dropout_20[0][0]']            |
+| dropout_16 (Dropout)           | (None, 8)          | 0         | ['dense_14[0][0]']              |
+| dropout_21 (Dropout)           | (None, 8)          | 0         | ['dense_19[0][0]']              |
+| age_output (Dense)             | (None, 1)          | 9         | ['dropout_16[0][0]']            |
+| gender_output (Dense)          | (None, 1)          | 9         | ['dropout_21[0][0]']            |
+
+ This CNN architecture, which has a total of 6,537,474 trainable parameters, is designed to balance complexity and interpretability in the context of our predicting tasks.
+
+The models train and validation loss can be visualised through this plot of Loss over Epochs.
+
+![Loss](./Results/CNN/LossOverEpochs.png)
+
+* **Gender Model Accuracy**: 0.8851351141929626
+* **Age Model Mean Absolute Error**: 0.12831860780715942
+
+* **Testing the data on new image:**
+
+![CNNOutput](./Results/CNN/CNN_result.png)
+<!-- Tables showing the results of your experiments -->
+NOTE: The CNN Model is uploaded on OneDrive and anyone with the Heriot-Watt email id can access the model.
+#### Discussion
+<!-- A brief discussion on the results of your experiment -->
+
+
+* We can see that the CNN model performs really well prediciting the given new image. We gave an image that had the original age of 31 and Gender as male. Our CNN model predicts it as 29, Male which is a pretty accurate prediction.
+* The accuracy of these predictions depends a lot on the quality of the images. Clear and distinct images give more accurate results, but the model struggles when faced with lower-quality or unclear pictures. The predicted age may vary a little but not much.
+* Gender being a binary classifiication, it is predicted correctly. These results make the model ready to be integrated with the final regression model.
+
+### Conclusion
+<!-- Final conclusions regarding your initial objectives -->
+We have merged the output model for Convolution Neuaral Network for predicting the age and gender of a person from image with the best Regression Model.
+* We have created a user interface in python that allows user to input image (for time being in a directory as jpg and then passing as a path) that gets us the age and gender.
+* The next step is asking user for theit BMI, How many Children they have, is the user a smoker or not and the region they belong to.
+* After this the user is prompted to provide their name.
+
+Based on these input variables, we run it through the best regression model - in our case : [Descision Forest](README.md#discussion-1) - and then give the predicted Insurance Premium. Some tweaks are done in the data for the BMI based weight category calculation using the formula mentioned in the [data wrangling section - point4](README.md#data-wrangling). This adds more value to the final output. Just for the project, to give a real scenario the output shows the premium in GBP (£).
+
+* **A sample User Interface looks like this:**
+![User Interface](./Results/Modelling/userInterface_Sample.png)
+![User Interface](./Results/Modelling/namePrompt.png)
+
+* **A sample output looks like this:**
+![Output](./Results/Modelling/final_Output.png)
+
+
+As it can be seen that the model predicts the Insurance Premium that the user is entitled to by using the Variables given. This is a pretty close prediction of the Premium.
+
+As discussed in the [Neural Network Section](README.md#discussion-2), the limitations held up are that the age might not be predicted by the model as to the true value. But this may be due to the quality of image. For that reason a disclaimer is given so that the user is made known of the issue. The gender being a binary classification, has shown promissing results and been predicted correctly by the CNN model.
+
+Final Comments:
+The Regression Model Performs well on the test data and also CNN model has shown excellent results. The data output varies with the user's input for the interface. The data can be predicted for inputs:
+
+**Autodetected using CNN**
+* Age
+* Gender : Male or Female
+
+**User Input**
+* BMI under 100
+* Children from 0 to 5
+* Smoker : Yes or No
+* Region: southwest, southeast, northwest, northeast
+
+The Predicted premium using the Descision Forest is given accordingly in GBP (£).
+
+# References
+NHS inform. (n.d.). Body mass index (BMI). [online] Available at: https://www.nhsinform.scot/healthy-living/food-and-nutrition/healthy-eating-and-weight-loss/body-mass-index-bmi/#:~:text=BMI%20ranges&text=under%2018.5%20%E2%80%93%20This%20is%20described.
+
+IBM (2023). What is Random Forest? | IBM. [online] www.ibm.com. Available at: https://www.ibm.com/topics/random-forest.
+
+Nvidia (n.d.). What is XGBoost? [online] NVIDIA Data Science Glossary. Available at: https://www.nvidia.com/en-us/glossary/data-science/xgboost/.
+
+
+Wikipedia Contributors (2019). Gradient boosting. [online] Wikipedia. Available at: https://en.wikipedia.org/wiki/Gradient_boosting.
+
+GeeksforGeeks. (2023). Support Vector Regression (SVR) using Linear and Non-Linear Kernels in Scikit Learn. [online] Available at: https://www.geeksforgeeks.org/support-vector-regression-svr-using-linear-and-non-linear-kernels-in-scikit-learn/.
+
+IBM (2023). What is the k-nearest neighbors algorithm? | IBM. [online] www.ibm.com. Available at: https://www.ibm.com/topics/knn.
+
+Subasi, A. (2020). Chapter 3 - Machine learning techniques. [online] ScienceDirect. Available at: https://www.sciencedirect.com/science/article/abs/pii/B9780128213797000035.
+
+Occhipinti, Annalisa, et al. “A Pipeline and Comparative Study of 12 Machine Learning Models for Text Classification.” Expert Systems with Applications, vol. 201, Sept. 2022, p. 117193, https://doi.org/10.1016/j.eswa.2022.117193.
+
+Xin, Doris, et al. “Production Machine Learning Pipelines: Empirical Analysis and Optimization Opportunities.” ArXiv.org, 29 Mar. 2021, arxiv.org/abs/2103.16007.
+
+G. S. K. Ranjan, A. Kumar Verma and S. Radhika, "K-Nearest Neighbors and Grid Search CV Based Real Time Fault Monitoring System for Industries," 2019 IEEE 5th International Conference for Convergence in Technology (I2CT), Bombay, India, 2019, pp. 1-5, doi: 10.1109/I2CT45611.2019.9033691.
+
+Shah, Rahul. “GridSearchCV |Tune Hyperparameters with GridSearchCV.” Analytics Vidhya, 23 June 2021, www.analyticsvidhya.com/blog/2021/06/tune-hyperparameters-with-gridsearchcv/.
+
+scikit-learn (2009). 1.10. Decision Trees — scikit-learn 0.22 documentation. [online] Scikit-learn.org. Available at: https://scikit-learn.org/stable/modules/tree.html.
+
+Tai, Yunpeng (2021). “A Survey of Regression Algorithms and Connections with Deep Learning.” ArXiv.org, 26 Apr. 2021, arxiv.org/abs/2104.12647.
+
+“List of Evaluation Metrics for Classification and Regression.” DEV Community, 6 Mar. 2021, dev.to/amananandrai/list-of-evaluation-metrics-for-classification-and-regression-1h27.
+
+Browne, Matthew, and Saeed Shiry Ghidary. “Convolutional Neural Networks for Image Processing: An Application in Robot Vision.” Lecture Notes in Computer Science, 2003, pp. 641–652, https://doi.org/10.1007/978-3-540-24581-0_55.
+
+“Image Classification Using CNN : Python Implementation.” Analytics Vidhya, 14 June 2021, www.analyticsvidhya.com/blog/2021/06/image-classification-using-convolutional-neural-network-with-python/
+
+“CNN Image Classification | Image Classification Using CNN.” Analytics Vidhya, 18 Feb. 2020, www.analyticsvidhya.com/blog/2020/02/learn-image-classification-cnn-convolutional-neural-networks-3-datasets/.
+
+S. Haldar, "Design and Implementation of an Image Classifier using CNN," 2019 3rd International Conference on Computing Methodologies and Communication (ICCMC), Erode, India, 2019, pp. 1012-1017, doi: 10.1109/ICCMC.2019.8819765.
+
+Jin, X., Han, J. (2011). K-Means Clustering. In: Sammut, C., Webb, G.I. (eds) Encyclopedia of Machine Learning. Springer, Boston, MA. https://doi.org/10.1007/978-0-387-30164-8_425
+
+S. Na, L. Xumin and G. Yong, "Research on k-means Clustering Algorithm: An Improved k-means Clustering Algorithm," 2010 Third International Symposium on Intelligent Information Technology and Security Informatics, Jian, China, 2010, pp. 63-67, doi: 10.1109/IITSI.2010.74.
+
+Stratos Idreos, Olga Papaemmanouil, and Surajit Chaudhuri. 2015. "Overview of Data Exploration Techniques." In Proceedings of the 2015 ACM SIGMOD International Conference on Management of Data (SIGMOD '15), 277–281. New York, NY, USA: Association for Computing Machinery. https://doi.org/10.1145/2723372.2731084
+
+Zuur, A.F., Ieno, E.N., and Elphick, C.S. (2010) "A protocol for data exploration to avoid common statistical problems." Methods in Ecology and Evolution, 1, 3-14. https://doi.org/10.1111/j.2041-210X.2009.00001.x
